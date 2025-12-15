@@ -6,7 +6,7 @@ This repository contains a FIPS-enabled end-to-end (E2E) test environment for ch
 2. Cypress running on a Chainguard Node-FIPS image
 3. Playwright is running on a Chainguard Node-FIPS image
 4. A full Selenium Grid using Chainguard private images
-5. A chainguard FIPS validated proxy for all tests suites using the Chainguard nginx-fip image
+5. A chainguard FIPS validated proxy for all tests suites using the Chainguard nginx-FIPS image
 6. Automated FIPS self-tests and TLS cipher checks that validate cryptographic provider status before running any tests
 
 **browser-side cryptography is explicitly excluded from the Authorization to Operate (ATO) boundary**
