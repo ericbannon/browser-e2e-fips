@@ -71,6 +71,7 @@ docker compose up --build e2e-nightwatch cypress playwright
 ### Running only Nightwatch 
 ```
 docker compose up --build e2e-nightwatch
+docker compose run --rm e2e-nightwatch
 ```
 
 Nightwatch Output:
@@ -85,8 +86,8 @@ nightwatch-runner/tests_output/nightwatch-html-report/index.html
 ### Running only Cypress
 ```
 docker compose up --build cypress
+docker compose run --rm cypress
 ```
-If FIPS validation or openssl-fips-test fails, Cypress will exit with a non-zero status and show the details in the test output.
 
 - Verifies Node.js is operating in FIPS mode
 - Executes the OpenSSL FIPS provider self-test via `openssl-fips-test`
@@ -96,7 +97,10 @@ If FIPS validation or openssl-fips-test fails, Cypress will exit with a non-zero
 
 ### Running only Playwright
 
-The Playwright runner performs the following cryptographic checks:
+```
+docker compose up --build playwright
+docker compose run --rm playwright
+```
 
 - Verifies Node.js is operating in FIPS mode
 - Executes the OpenSSL FIPS provider self-test via `openssl-fips-test`
