@@ -130,6 +130,9 @@ services:
       - CYPRESS_baseUrl=https://www.google.com
       - CYPRESS_CACHE_FOLDER=/home/nonroot/.cache/Cypress
       - CI=1
+    networks:
+      - testnet
+      - default
 
   tls-proxy:
     image: cgr.dev/chainguard-private/nginx-fips:latest
@@ -142,6 +145,7 @@ services:
       - aut
     networks:
       - testnet
+      - default
 
   aut:
     # your app / target service
@@ -150,6 +154,7 @@ services:
       - "8080"
     networks:
       - testnet
+      - default
 
   
   playwright:
@@ -174,3 +179,4 @@ services:
 
 networks:
   testnet: {}
+  default: {}

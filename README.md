@@ -64,13 +64,14 @@ This environment provides:
 ## USAGE
 
 ```
-docker compose down --remove-orphans
-docker compose up --build e2e-nightwatch cypress playwright
+docker compose down -v --remove-orphans
+docker network prune -f
+docker compose pull
+docker compose up -d tls-proxy aut
 ```
 
-### Running only Nightwatch 
+### Running Nightwatch 
 ```
-docker compose up --build e2e-nightwatch
 docker compose run --rm e2e-nightwatch
 ```
 
@@ -83,9 +84,8 @@ nightwatch-runner/tests_output/nightwatch-html-report/index.html
 - TLS negotiation uses approved protocols and ciphers
 - Non-FIPS browser crypto is isolated outside the compliance boundary
 
-### Running only Cypress
+### Running Cypress
 ```
-docker compose up --build cypress
 docker compose run --rm cypress
 ```
 
@@ -95,10 +95,9 @@ docker compose run --rm cypress
   - Negotiated TLS protocol (TLS 1.2 / TLS 1.3)
   - Negotiated cipher suite (AES-GCM only)
 
-### Running only Playwright
+### Running Playwright
 
 ```
-docker compose up --build playwright
 docker compose run --rm playwright
 ```
 
