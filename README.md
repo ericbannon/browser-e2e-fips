@@ -9,6 +9,8 @@ This repository contains a FIPS-enabled end-to-end (E2E) test environment for ch
 5. A chainguard FIPS validated proxy for all tests suites using the Chainguard nginx-FIPS image
 6. Automated FIPS self-tests and TLS cipher checks that validate cryptographic provider status before running any tests
 
+**NOTE:** You must generate your own self signed certificates in fips-tls/certs for docker-compose to work
+
 **browser-side cryptography is explicitly excluded from the Authorization to Operate (ATO) boundary**
 
 ![ATO Boundary Diagram](assets/diagram.png)
