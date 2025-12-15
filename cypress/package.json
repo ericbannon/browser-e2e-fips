@@ -1,0 +1,12 @@
+{
+  "name": "cypress-tests",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "test": "cypress run --headless",
+    "test:electron": "cypress run --browser electron --headless"
+  },
+  "devDependencies": {
+    "cypress": "13.17.0"
+  }
+}

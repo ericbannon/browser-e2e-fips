@@ -1,0 +1,11 @@
+{
+  "name": "playwright-tests",
+  "version": "1.0.0",
+  "private": true,
+  "devDependencies": {
+    "@playwright/test": "^1.49.0"
+  },
+  "scripts": {
+    "test": "node ./tests/fips-precheck.js && node ./tests/tls-precheck.js && npx playwright test"
+  }
+}

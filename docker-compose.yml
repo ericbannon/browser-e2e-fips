@@ -1,0 +1,176 @@
+services:
+  selenium-event-bus:
+    image: cgr.dev/chainguard-private/selenium-event-bus:v4.38.0
+    platform: linux/amd64
+    container_name: selenium-event-bus
+    environment:
+      - SE_EVENT_BUS_PUBLISH_PORT=4442
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+      - SE_EVENT_BUS_HOST=selenium-event-bus
+    ports:
+      - "4442:4442"
+      - "4443:4443"
+      - "5557:5557"
+
+  selenium-sessions:
+    image: cgr.dev/chainguard-private/selenium-sessions:v4.38.0
+    platform: linux/amd64
+    container_name: selenium-sessions
+    depends_on:
+      - selenium-event-bus
+    environment:
+      - SE_EVENT_BUS_HOST=selenium-event-bus
+
+  selenium-session-queue:
+    image: cgr.dev/chainguard-private/selenium-session-queue:v4.38.0
+    platform: linux/amd64
+    container_name: selenium-session-queue
+    depends_on:
+      - selenium-event-bus
+    environment:
+      - SE_EVENT_BUS_HOST=selenium-event-bus
+    ports:
+      - "5559:5559"
+
+  selenium-distributor:
+    image: cgr.dev/chainguard-private/selenium-distributor:v4.38.0
+    platform: linux/amd64
+    container_name: selenium-distributor
+    depends_on:
+      - selenium-event-bus
+      - selenium-sessions
+      - selenium-session-queue
+    environment:
+      - SE_EVENT_BUS_HOST=selenium-event-bus
+      - SE_SESSIONS_MAP_HOST=selenium-sessions
+      - SE_SESSION_QUEUE_HOST=selenium-session-queue
+    ports:
+      - "5553:5553"
+
+  selenium-router:
+    image: cgr.dev/chainguard-private/selenium-router:v4.38.0
+    platform: linux/amd64
+    container_name: selenium-router
+    depends_on:
+      - selenium-distributor
+      - selenium-sessions
+      - selenium-session-queue
+    environment:
+      - SE_DISTRIBUTOR_HOST=selenium-distributor
+      - SE_SESSIONS_MAP_HOST=selenium-sessions
+      - SE_SESSION_QUEUE_HOST=selenium-session-queue
+    ports:
+      - "4444:4444" # WebDriver entrypoint for Nightwatch & other clients
+
+  selenium-node-chromium:
+    image: cgr.dev/chainguard-private/selenium-node-chromium:v4.38.0
+    platform: linux/amd64
+    container_name: selenium-node-chromium
+    shm_size: "2g"
+    depends_on:
+      - selenium-event-bus
+    environment:
+      - SE_EVENT_BUS_HOST=selenium-event-bus
+      - SE_NODE_MAX_SESSIONS=1
+      - SE_NODE_OVERRIDE_MAX_SESSIONS=true
+      - SE_NODE_SESSION_TIMEOUT=300
+      - SE_NODE_BROWSER_NAME=chrome
+      - SE_NODE_GRID_URL=http://selenium-router:4444
+
+  selenium-node-firefox:
+    image: cgr.dev/chainguard-private/selenium-node-firefox:v4.38.0
+    platform: linux/amd64
+    container_name: selenium-node-firefox
+    shm_size: "2g"
+    depends_on:
+      - selenium-event-bus
+    environment:
+      - SE_EVENT_BUS_HOST=selenium-event-bus
+      - SE_NODE_MAX_SESSIONS=1
+      - SE_NODE_OVERRIDE_MAX_SESSIONS=true
+      - SE_NODE_SESSION_TIMEOUT=300
+      - SE_NODE_BROWSER_NAME=firefox
+      - SE_NODE_GRID_URL=http://selenium-router:4444
+
+  e2e-nightwatch:
+    build:
+      context: ./nightwatch-runner
+      dockerfile: Dockerfile
+    image: e2e-nightwatch
+    platform: linux/amd64
+    container_name: e2e-nightwatch
+    depends_on:
+      - selenium-router
+      - selenium-node-chromium
+      - selenium-node-firefox
+    environment:
+      - SELENIUM_HOST=selenium-router
+      - SELENIUM_PORT=4444
+      - LAUNCH_URL=https://tls-proxy:8443
+      # Optional app target – adjust if you want to hit a real app:
+      # - APP_URL=https://your-app.example.com
+    volumes:
+      # Persist Nightwatch HTML reports to the host
+      - ./nightwatch-runner/tests_output:/workspace/tests_output
+    networks:
+      - testnet
+      - default
+
+  cypress:
+    build:
+      context: ./cypress
+      dockerfile: Dockerfile
+    image: cypress-tests
+    platform: linux/amd64
+    container_name: cypress
+    working_dir: /e2e
+    entrypoint: ["/bin/sh", "-lc"]
+    command: ["npm test"]
+    environment:
+      - CYPRESS_baseUrl=https://www.google.com
+      - CYPRESS_CACHE_FOLDER=/home/nonroot/.cache/Cypress
+      - CI=1
+
+  tls-proxy:
+    image: cgr.dev/chainguard-private/nginx-fips:latest
+    ports:
+      - "8443:8443"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./fips-tls/certs:/etc/nginx/certs:ro
+    depends_on:
+      - aut
+    networks:
+      - testnet
+
+  aut:
+    # your app / target service
+    image: cgr.dev/chainguard-private/nginx:latest
+    expose:
+      - "8080"
+    networks:
+      - testnet
+
+  
+  playwright:
+    build:
+      context: ./playwright
+      dockerfile: Dockerfile
+    image: playwright-tests
+    platform: linux/amd64
+    container_name: playwright
+    working_dir: /e2e
+    entrypoint: ["/bin/sh", "-lc"]
+    command: ["npm test"]
+    environment:
+      - PW_BASE_URL=https://tls-proxy:8443
+      - CI=1
+    depends_on:
+      - selenium-router
+      - tls-proxy
+    networks:
+      - default
+      - testnet
+
+networks:
+  testnet: {}

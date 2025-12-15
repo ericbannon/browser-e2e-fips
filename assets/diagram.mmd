@@ -1,0 +1,41 @@
+flowchart TB
+
+%% =========================
+%% OUT OF ATO
+%% =========================
+subgraph OUT[OUT OF ATO NON FIPS SCOPE]
+  Browser["Browser Engines Chromium Firefox"]
+  BrowserInfo["Embedded crypto implementations<br/>Not FIPS validated<br/>Cannot operate in FIPS mode<br/>Treated as untrusted external clients"]
+  Browser --> BrowserInfo
+end
+
+%% =========================
+%% IN ATO
+%% =========================
+subgraph IN[IN ATO FIPS BOUNDARY]
+
+  %% ---- Runners (top row) ----
+  Cypress["Cypress Runner<br/>Chainguard node fips"]
+  Nightwatch["Nightwatch Runner<br/>Chainguard jdk fips"]
+  Playwright["Playwright Runner<br/>Chainguard node fips"]
+
+  %% ---- TLS enforcement layer ----
+  Proxy["FIPS TLS Proxy<br/>nginx OpenSSL FIPS"]
+  ProxyInfo["FIPS provider enabled<br/>FIPS self tests at startup<br/>Approved TLS versions and ciphers only"]
+
+  %% ---- Application ----
+  AUT["Application Under Test"]
+
+  %% ---- Flows ----
+  Cypress -->|TLS enforced| Proxy
+  Nightwatch -->|TLS enforced| Proxy
+  Playwright -->|TLS enforced| Proxy
+
+  Proxy --> ProxyInfo
+  Proxy -->|HTTP internal trusted| AUT
+end
+
+%% =========================
+%% External browser flow
+%% =========================
+Browser -->|TLS client initiated| Proxy

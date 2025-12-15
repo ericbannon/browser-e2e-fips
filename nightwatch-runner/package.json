@@ -1,0 +1,11 @@
+{
+  "name": "nightwatch-runner",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "test": "nightwatch --config nightwatch.conf.js"
+  },
+  "devDependencies": {
+    "nightwatch": "^3.6.0"
+  }
+}
