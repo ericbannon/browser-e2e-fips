@@ -15,11 +15,11 @@ This repository contains a FIPS-enabled end-to-end (E2E) test environment for ch
 
 ![ATO Boundary Diagram](assets/diagram.png)
 
-Most modern browsers embed their own cryptographic stacks which are **not FIPS 140-2/140-3 validated** and cannot be configured to operate in FIPS mode. Firefox is the exception
+Most modern browsers embed their own cryptographic stacks which are **not FIPS 140-2/140-3 validated** and cannot be configured to operate in FIPS mode
 
 * Chromium: Uses BoringSSL (Google's OpenSSL fork) - not FIPS validated, deeply integrated into browser networking stack
 
-* Firefox: Uses NSS (Network Security Services) - FIPS mode exists 
+* Firefox: Uses NSS (Network Security Services) - FIPS mode exists but but only RHEL / Fedora provide a validated configuration suitable for compliance claims.
 
 * WebKit: Custom crypto implementation - not FIPS validated, no FIPS mode available
 
