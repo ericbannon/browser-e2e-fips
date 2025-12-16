@@ -19,7 +19,7 @@ Most modern browsers embed their own cryptographic stacks which are **not FIPS 1
 
 * Chromium: Uses BoringSSL (Google's OpenSSL fork) - not FIPS validated, deeply integrated into browser networking stack
 
-* Firefox: Uses NSS (Network Security Services) - FIPS mode exists but but only RHEL / Fedora provide a validated configuration suitable for compliance claims.
+* Firefox: Uses NSS (Network Security Services) - FIPS mode exists but only RHEL / Fedora provide a validated configuration suitable for compliance claims.
 
 * WebKit: Custom crypto implementation - not FIPS validated, no FIPS mode available
 
